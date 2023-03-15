@@ -80,7 +80,10 @@ CREATE TABLE default.daemon_heartbeat (
   cpu_sys_avg Float32,
   server_time DateTime DEFAULT now()
 )
-ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/daemon_heartbeat', '{replica}', date, (daemon, server, port), 8192, server_time);
+ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/daemon_heartbeat', '{replica}', server_time)
+PARTITION BY date
+ORDER BY (daemon, server, port)
+SETTINGS index_granularity = 8192;
 
 CREATE TABLE default.daemon_heartbeat_buffer AS default.daemon_heartbeat ENGINE = Buffer(default, daemon_heartbeat, 2, 15, 15, 10000000, 10000000, 100000000, 100000000);
 ```
