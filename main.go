@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -21,6 +22,7 @@ var (
 	// query (GET)
 	queryKeyBytes   = []byte("query")   // SQL query in form 'SELECT ... FROM ...'
 	queryKeyTimeout = []byte("timeout") // timeout, in seconds
+	statsKeyBytes   = []byte("stats")
 
 	// insert (POST)
 	queryKeyTable      = []byte("table")      // table name with columns, e.g. table(a,b,c)
@@ -34,6 +36,16 @@ func handleGET(ctx *fasthttp.RequestCtx) {
 	timeout := defaultTimeout
 
 	args := ctx.QueryArgs()
+
+	if stats_bytes := args.PeekBytes(statsKeyBytes); stats_bytes != nil {
+		stats := make(map[string]string)
+		inmem.AddStats(stats)
+		persist.AddStats(stats)
+		jsonString, _ := json.MarshalIndent(stats, "", "    ")
+		ctx.SetStatusCode(200)
+		ctx.Write(jsonString)
+		return
+	}
 
 	if queryBytes := args.PeekBytes(queryKeyBytes); queryBytes != nil {
 		query = string(queryBytes)
