@@ -440,7 +440,7 @@ func flush(dst *destination.Setting, table string, body io.Reader, rowBinary boo
 		compressionArgs = "decompress=1&http_native_compression_disable_checksumming_on_decompress=1&"
 	}
 
-	url := fmt.Sprintf("http://%s/?input_format_values_interpret_expressions=0&%squery=%s", srv, compressionArgs, queryPrefix)
+	url := fmt.Sprintf("http://%s/?insert_deduplicate=0&input_format_values_interpret_expressions=0&%squery=%s", srv, compressionArgs, queryPrefix)
 
 	resp, err := httpClient.Post(url, "application/x-www-form-urlencoded", body)
 	if err != nil {
