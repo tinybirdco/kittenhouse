@@ -125,7 +125,8 @@ func needRotate(tfp *tableFp) bool {
 
 func getFileForTable(table string, rowBinary bool) (*tableFp, error) {
 	filesMap.RLock()
-	tfp, ok := filesMap.v[table]
+	table_key := fmt.Sprintf("%s_%t", table, rowBinary)
+	tfp, ok := filesMap.v[table_key]
 	filesMap.RUnlock()
 	if ok && !needRotate(tfp) {
 		return tfp, nil
@@ -134,7 +135,7 @@ func getFileForTable(table string, rowBinary bool) (*tableFp, error) {
 	filesMap.Lock()
 	defer filesMap.Unlock()
 
-	tfp, ok = filesMap.v[table]
+	tfp, ok = filesMap.v[table_key]
 	if ok && !needRotate(tfp) {
 		return tfp, nil
 	}
@@ -161,7 +162,7 @@ func getFileForTable(table string, rowBinary bool) (*tableFp, error) {
 		tfp.bytesWritten = st.Size()
 	}
 
-	filesMap.v[table] = tfp
+	filesMap.v[table_key] = tfp
 
 	if err := writeHeader(fp, table, rowBinary); err != nil {
 		return nil, err
