@@ -78,14 +78,12 @@ const dtFormat = "20060102_150405"
 
 func getTableFileName(table string, rowBinary bool) string {
 	parts := strings.SplitN(table, "(", 2)
-	if len(parts) == 1 {
-		return parts[0]
-	}
-
 	dt := time.Now().In(time.Local).Format(dtFormat)
 
 	h := md5.New()
-	h.Write([]byte(parts[1]))
+	if len(parts) > 1 {
+		h.Write([]byte(parts[1]))
+	}
 	if rowBinary {
 		h.Write([]byte("|RowBinary"))
 	}
